@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nemo y Dory - Web Storage</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            text-align: center;
+            transition: background-color 1s linear;
+        }
+
+        h1 {
+            color: #035373;
+            margin-top: 30px;
+        }
+
+        .pecera {
+            background-color: rgba(255, 255, 255, 0.8);
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 350px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .pez {
+            margin: 20px 0;
+        }
+
+        .nombre {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .contador {
+            font-size: 36px;
+            margin: 8px 0;
+            color: #055160;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #0ea5e9;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0284c7;
+        }
+    </style>
+</head>
+<body>
+<h1>🐠 Pecera Inteligente</h1>
+
+<div class="pecera">
+    <div class="pez">
+        <div class="nombre">🐟 Nemo (recuerda siempre)</div>
+        <div id="nemo-contador" class="contador">0</div>
+        <button onclick="incrementarNemo()">+1 Pez visto</button>
+    </div>
+
+    <div class="pez">
+        <div class="nombre">🐟 Dory (olvida al recargar)</div>
+        <div id="dory-contador" class="contador">0</div>
+        <button onclick="incrementarDory()">+1 Pez visto</button>
+    </div>
+</div>
+
+<script>
+    // Obtener contadores
+    let nemo = parseInt(localStorage.getItem('nemo')) || 0;
+    let dory = parseInt(sessionStorage.getItem('dory')) || 0;
+
+    // Mostrar valores al cargar
+    document.getElementById('nemo-contador').textContent = nemo;
+    document.getElementById('dory-contador').textContent = dory;
+
+    function incrementarNemo() {
+        nemo++;
+        document.getElementById('nemo-contador').textContent = nemo;
+        localStorage.setItem('nemo', nemo);
+    }
+
+    function incrementarDory() {
+        dory++;
+        document.getElementById('dory-contador').textContent = dory;
+        sessionStorage.setItem('dory', dory);
+    }
+
+    // Fondo dinámico: de azul claro (#add8e6) a verde (#90ee90)
+    let segundos = 0;
+    function actualizarFondo() {
+        const azul = { r: 173, g: 216, b: 230 };
+        const verde = { r: 144, g: 238, b: 144 };
+        const t = Math.min(segundos / 60, 1); // máximo 60 segundos
+
+        const r = Math.round(azul.r + (verde.r - azul.r) * t);
+        const g = Math.round(azul.g + (verde.g - azul.g) * t);
+        const b = Math.round(azul.b + (verde.b - azul.b) * t);
+
+        document.body.style.backgroundColor = `rgb(${r},${g},${b})`;
+
+        segundos++;
+    }
+
+    // Cambiar color cada segundo
+    setInterval(actualizarFondo, 1000);
+</script>
+</body>
+</html>

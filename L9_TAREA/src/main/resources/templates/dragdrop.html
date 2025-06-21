@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pecera con Drag and Drop - Nemo y Dory</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #87CEEB, #4682B4);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        h1 {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+        }
+
+        .pecera {
+            width: 800px;
+            height: 600px;
+            margin: 20px auto;
+            border: 8px solid #8B4513;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 100%);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: background 1s ease-in-out;
+        }
+
+        .controles {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 20px 0;
+        }
+
+        .pez-control {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .nemo-control {
+            background: linear-gradient(145deg, #FF6B35, #FF8C42);
+        }
+
+        .dory-control {
+            background: linear-gradient(145deg, #4A90E2, #357ABD);
+        }
+
+        .contador {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            margin: 10px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .boton-pez {
+            padding: 12px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .boton-nemo {
+            background: #FF4500;
+            color: white;
+        }
+
+        .boton-dory {
+            background: #1E90FF;
+            color: white;
+        }
+
+        .boton-pez:hover {
+            transform: scale(1.1);
+        }
+
+        .pez {
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .nemo {
+            background: radial-gradient(circle, #FF6B35, #FF4500);
+            left: 150px;
+            top: 200px;
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+        }
+
+        .dory {
+            background: radial-gradient(circle, #4A90E2, #1E90FF);
+            right: 150px;
+            top: 200px;
+            box-shadow: 0 0 20px rgba(30, 144, 255, 0.5);
+        }
+
+        .drop-zone {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border: 3px dashed transparent;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .nemo-zone {
+            left: 120px;
+            top: 170px;
+        }
+
+        .dory-zone {
+            right: 120px;
+            top: 170px;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.2);
+            transform: scale(1.1);
+        }
+
+        .burbuja {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: grab;
+            z-index: 5;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .burbuja:active {
+            cursor: grabbing;
+            transform: scale(1.1);
+        }
+
+        .burbuja-nemo {
+            background: radial-gradient(circle at 30% 30%, #FFB347, #FF6B35);
+            border: 2px solid #FF4500;
+        }
+
+        .burbuja-dory {
+            background: radial-gradient(circle at 30% 30%, #87CEEB, #4A90E2);
+            border: 2px solid #1E90FF;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .reset-btn {
+            margin: 20px;
+            padding: 12px 25px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .reset-btn:hover {
+            transform: scale(1.05);
+            background: #A0522D;
+        }
+
+        .instructions {
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🐠 Pecera Interactiva - Nemo y Dory 🐠</h1>
+
+    <div class="instructions">
+        <h3>Instrucciones del Juego:</h3>
+        <p>Arrastra las burbujas naranjas hacia Nemo y las azules hacia Dory. ¡Cada burbuja correcta aumenta su contador!</p>
+        <p>Las burbujas aparecen cada 2 segundos desde la parte superior.</p>
+    </div>
+
+    <div class="controles">
+        <div class="pez-control nemo-control">
+            <h3>🤡 Nemo</h3>
+            <div class="contador" id="contadorNemo">Peces vistos: 0</div>
+            <button class="boton-pez boton-nemo" onclick="incrementarNemo()">Ver Pez</button>
+        </div>
+
+        <div class="pez-control dory-control">
+            <h3>🐟 Dory</h3>
+            <div class="contador" id="contadorDory">Peces vistos: 0</div>
+            <button class="boton-pez boton-dory" onclick="incrementarDory()">Ver Pez</button>
+        </div>
+    </div>
+
+    <div class="pecera" id="pecera">
+        <!-- Zonas de drop invisibles -->
+        <div class="drop-zone nemo-zone" id="nemoZone"></div>
+        <div class="drop-zone dory-zone" id="doryZone"></div>
+
+        <!-- Peces -->
+        <div class="pez nemo" id="nemo">🤡</div>
+        <div class="pez dory" id="dory">🐟</div>
+    </div>
+
+    <button class="reset-btn" onclick="limpiarPecera()">🧽 Limpiar Pecera</button>
+</div>
+
+<script>
+    // Variables globales
+    let contadorNemo = 0;
+    let contadorDory = 0;
+    let colorTimer = 0;
+    let burbujaCounter = 0;
+
+    // Inicialización
+    window.onload = function() {
+        cargarContadores();
+        iniciarCambioColor();
+        iniciarGeneracionBurbujas();
+        configurarDropZones();
+    };
+
+    // Funciones de contador
+    function incrementarNemo() {
+        contadorNemo++;
+        document.getElementById('contadorNemo').textContent = `Peces vistos: ${contadorNemo}`;
+        localStorage.setItem('contadorNemo', contadorNemo);
+    }
+
+    function incrementarDory() {
+        contadorDory++;
+        document.getElementById('contadorDory').textContent = `Peces vistos: ${contadorDory}`;
+        sessionStorage.setItem('contadorDory', contadorDory);
+    }
+
+    function cargarContadores() {
+        // Nemo usa localStorage (memoria permanente)
+        contadorNemo = parseInt(localStorage.getItem('contadorNemo')) || 0;
+        document.getElementById('contadorNemo').textContent = `Peces vistos: ${contadorNemo}`;
+
+        // Dory usa sessionStorage (memoria temporal)
+        contadorDory = parseInt(sessionStorage.getItem('contadorDory')) || 0;
+        document.getElementById('contadorDory').textContent = `Peces vistos: ${contadorDory}`;
+    }
+
+    function limpiarPecera() {
+        // Reiniciar color
+        colorTimer = 0;
+        document.getElementById('pecera').style.background = 'linear-gradient(180deg, #87CEEB 0%, #4682B4 100%)';
+
+        // Limpiar burbujas
+        const burbujas = document.querySelectorAll('.burbuja');
+        burbujas.forEach(burbuja => burbuja.remove());
+    }
+
+    // Cambio de color progresivo
+    function iniciarCambioColor() {
+        setInterval(() => {
+            colorTimer++;
+            const progress = Math.min(colorTimer / 60, 1); // 60 segundos para completar el cambio
+
+            // Interpolación de azul a verde
+            const r1 = 135, g1 = 206, b1 = 235; // Azul claro inicial
+            const r2 = 70, g2 = 130, b2 = 180;   // Azul oscuro inicial
+
+            const r1_final = 144, g1_final = 238, b1_final = 144; // Verde claro final
+            const r2_final = 34, g2_final = 139, b2_final = 34;   // Verde oscuro final
+
+            const r1_current = Math.round(r1 + (r1_final - r1) * progress);
+            const g1_current = Math.round(g1 + (g1_final - g1) * progress);
+            const b1_current = Math.round(b1 + (b1_final - b1) * progress);
+
+            const r2_current = Math.round(r2 + (r2_final - r2) * progress);
+            const g2_current = Math.round(g2 + (g2_final - g2) * progress);
+            const b2_current = Math.round(b2 + (b2_final - b2) * progress);
+
+            document.getElementById('pecera').style.background =
+                `linear-gradient(180deg, rgb(${r1_current},${g1_current},${b1_current}) 0%, rgb(${r2_current},${g2_current},${b2_current}) 100%)`;
+        }, 1000);
+    }
+
+    // Generación de burbujas
+    function iniciarGeneracionBurbujas() {
+        setInterval(() => {
+            crearBurbuja();
+        }, 2000);
+    }
+
+    function crearBurbuja() {
+        const pecera = document.getElementById('pecera');
+        const burbuja = document.createElement('div');
+        const esNemo = Math.random() < 0.5;
+
+        burbujaCounter++;
+        burbuja.id = `burbuja-${burbujaCounter}`;
+        burbuja.className = `burbuja ${esNemo ? 'burbuja-nemo' : 'burbuja-dory'}`;
+        burbuja.draggable = true;
+
+        // Posición inicial aleatoria en la parte superior
+        const maxLeft = pecera.offsetWidth - 40;
+        burbuja.style.left = Math.random() * maxLeft + 'px';
+        burbuja.style.top = '10px';
+
+        // Datos para identificar el tipo
+        burbuja.dataset.tipo = esNemo ? 'nemo' : 'dory';
+        burbuja.dataset.posicionInicial = burbuja.style.left;
+
+        // Event listeners para drag and drop
+        burbuja.addEventListener('dragstart', handleDragStart);
+        burbuja.addEventListener('dragend', handleDragEnd);
+
+        pecera.appendChild(burbuja);
+
+        // Eliminar burbuja después de 10 segundos si no se usa
+        setTimeout(() => {
+            if (document.getElementById(burbuja.id)) {
+                burbuja.remove();
+            }
+        }, 10000);
+    }
+
+    // Configurar zonas de drop
+    function configurarDropZones() {
+        const nemoZone = document.getElementById('nemoZone');
+        const doryZone = document.getElementById('doryZone');
+
+        [nemoZone, doryZone].forEach(zone => {
+            zone.addEventListener('dragover', handleDragOver);
+            zone.addEventListener('dragenter', handleDragEnter);
+            zone.addEventListener('dragleave', handleDragLeave);
+            zone.addEventListener('drop', handleDrop);
+        });
+    }
+
+    // Manejadores de eventos de drag and drop
+    function handleDragStart(e) {
+        e.dataTransfer.setData('text/plain', e.target.id);
+        e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragEnd(e) {
+        // Limpiar estilos de drag over
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            zone.classList.remove('drag-over');
+        });
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    }
+
+    function handleDragEnter(e) {
+        e.preventDefault();
+        e.target.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+        if (!e.target.contains(e.relatedTarget)) {
+            e.target.classList.remove('drag-over');
+        }
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.target.classList.remove('drag-over');
+
+        const burbujaId = e.dataTransfer.getData('text/plain');
+        const burbuja = document.getElementById(burbujaId);
+
+        if (!burbuja) return;
+
+        const tipoBurbuja = burbuja.dataset.tipo;
+        const zonaId = e.target.id;
+
+        // Verificar si la burbuja coincide con la zona correcta
+        const esCorrecta = (tipoBurbuja === 'nemo' && zonaId === 'nemoZone') ||
+            (tipoBurbuja === 'dory' && zonaId === 'doryZone');
+
+        if (esCorrecta) {
+            // Incrementar contador del pez correspondiente
+            if (tipoBurbuja === 'nemo') {
+                incrementarNemo();
+            } else {
+                incrementarDory();
+            }
+
+            // Eliminar la burbuja
+            burbuja.remove();
+
+            // Efecto visual de éxito
+            mostrarEfectoExito(e.target);
+        } else {
+            // Devolver a posición inicial
+            burbuja.style.left = burbuja.dataset.posicionInicial;
+            burbuja.style.top = '10px';
+        }
+    }
+
+    function mostrarEfectoExito(zona) {
+        zona.style.background = 'rgba(0, 255, 0, 0.3)';
+        setTimeout(() => {
+            zona.style.background = '';
+        }, 500);
+    }
+</script>
+</body>
+</html>
